@@ -1,0 +1,34 @@
+version: '3.3'
+services:
+  tag-server:
+    image: 'gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable'
+    expose:
+      - 8080
+    environment:
+      - CONTAINER_CONFIG=$CONTAINER_CONFIG
+      - PREVIEW_SERVER_URL=https://${PREVIEW_SERVER_DOMAIN}
+      - RUN_AS_PREVIEW_SERVER=false
+
+  preview-server:
+    image: 'gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable'
+    expose:
+      - 8080
+    environment:
+      - CONTAINER_CONFIG=$CONTAINER_CONFIG
+      - RUN_AS_PREVIEW_SERVER=true
+
+  proxy:
+    image: caddy:2
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile
+      - ./proxy/logs:/etc/logs
+      - caddy:/data
+    environment:
+      TAG_SERVER_DOMAIN: $TAG_SERVER_DOMAIN
+      PREVIEW_SERVER_DOMAIN: $PREVIEW_SERVER_DOMAIN
+
+volumes:
+  caddy:
