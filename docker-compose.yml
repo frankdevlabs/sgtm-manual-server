@@ -11,8 +11,6 @@ services:
         delay: 10s
       restart_policy:
         condition: on-failure
-    expose:
-      - 8080
     environment:
       - CONTAINER_CONFIG=$CONTAINER_CONFIG
       - PREVIEW_SERVER_URL=https://${PREVIEW_SERVER_DOMAIN}
@@ -24,8 +22,6 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-    expose:
-      - 8080
     environment:
       - CONTAINER_CONFIG=$CONTAINER_CONFIG
       - RUN_AS_PREVIEW_SERVER=true
@@ -34,14 +30,17 @@ services:
     image: caddy:2
     deploy:
       replicas: 1
+      placement:
+        constraints:
+          - "node.role==manager"
       restart_policy:
         condition: on-failure
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./proxy/Caddyfile:/etc/caddy/Caddyfile
-      - ./proxy/logs:/etc/logs
+      - $PWD/proxy/Caddyfile:/etc/caddy/Caddyfile
+      - $PWD/proxy/logs:/etc/logs
       - caddy:/data
     environment:
       TAG_SERVER_DOMAIN: $TAG_SERVER_DOMAIN
