@@ -1,28 +1,29 @@
 
 # Manual sGTM setup on a Docker Swarm cluster
 
-This template can be used to setup server-side Google Tag Manager (sGTM) using a cluster of Docker Swarm nodes (hosted 
-on a vps such as EC2 or a droplet on [Digital Ocean ](https://digitalocean.com/)). This is setup is meant as a rudimentary 
+This template can be used to initiate server-side Google Tag Manager (sGTM) using a cluster of Docker Swarm nodes (hosted 
+on a VPS such as EC2 or a [Digital Ocean ](https://digitalocean.com/) droplet). This setup is meant as a rudimentary 
 starting point to self-host sGTM. This setup will require an own domain name.
 
 ## Usage example
-We will use Digital Ocean as an example. Digital Ocean offers an relative easy interface to test this setup. You could also opt for
+We will use Digital Ocean as an example. Digital Ocean offers an relative easy interface to test this setup. You could opt for
 (even) cheaper alternatives, such as [Contabo](https://contabo.com/en/). AWS EC2 instances are also a great option when using spot instances.
 
 1. In Digital Ocean we create several VPS ('droplets') within the same VPC (select the option when creating your 'droplets' 
 in Digital Ocean). This example is tested with 5 small VPS: 1 GB / 1 Intel vCPU / 25 GB. Your could also opt for 2-3 'droplets' 
 with more capacity. Some specific Digital Ocean related note which allow to safe some time:
-- (i) Don't forget to select the D**ocker Image** under 'Marketplace' section when creating your VPS (ellse you need to 
+- (i) Don't forget to select the **Docker Image** under then'Marketplace' section when creating your VPS (else you need to 
 install this yourself - [see here](https://docs.docker.com/desktop/install/ubuntu/))!
 - (ii) Add a SSH key to your VPS! See [this page](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/) 
 if your don't know how.
 ![creating 5 droplets in DO](./images/digital-ocean-create-5-droplets.png)
 
-2. Next, we ssh into one of the VPS. Like so (replace IP with one of the droplets you just created):
+2. Next, we ssh into one of the VPS, like so (replace the public IP with one of the droplets you just created):
    ```bash 
     $ ssh root@174.138.14.207
    ```
-3. We will now create the 'manager node' of the Docker Swarm. Setup the Firewall of the host you have ssh'd into like so:
+3. We will now create the 'manager node' of the Docker Swarm, but first we modify the firewall of the host you have just 
+ssh'd into:
     ```bash 
     $ ufw allow 22/tcp
     $ ufw allow 2376/tcp
@@ -35,13 +36,13 @@ if your don't know how.
     ```bash 
     $ ufw reload
    ```
-   Run the following command to create a new swarm ([more info, here](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/)):
+   Then, run the following command to create a new swarm ([more info, here](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/)):
    ```bash 
    $ docker swarm init --advertise-addr <MANAGER-VPC-IP>
    ```
    **Note**: ManagerVPC-IP = found [here in Digital Ocean](https://cloud.digitalocean.com/networking/vpc) in your VPC next to the public ip- e.g. 10.133.0.2
-    This will generate a command with a token which needs to be run in other hosts, therefore save it in your notepad for later.
-4. The other hosts will function as 'worker nodes' (as opposed to the manager node). Therefore, you need to Repeat the 
+    This will generate a command with a token which needs to be run in the other hosts, therefore save it in your notepad for later.
+4. The other hosts will function as 'worker nodes' (as opposed to the manager node). Therefore, you need to repeat the 
 following steps for each of the other hosts. First you ssh into the host: 
     ```bash 
     $ ssh root@206.189.98.48
@@ -86,10 +87,11 @@ configuration.
    ```
    
 If everything goes well.. then your very own sGTM cluster should start working. Sometimes it takes a while for the dns records 
-to kick in. Test it by going to the path '/healthz' on your domain(s). More information [here](https://developers.google.com/tag-platform/tag-manager/server-side/manual-setup-guide)
+to kick in. Test it by going to the path '/healthz' on your domain(s). More information about manual setting up sGTM can 
+found [here](https://developers.google.com/tag-platform/tag-manager/server-side/manual-setup-guide).
 
 ## About this setup in production
-This setup is more than fine for a small website, but we can do better... I advice a more resilient solution 
+This setup is more than fine for a small website, but we can do better... However, I advise a more resilient solution 
 in production for websites for which sGTM uptime is business critical. Such a setup includes a CDN (e.g. Cloudflare or 
 Cloudfront) and/or load balancer to handling proxying to your sGTM container (instead of Caddy). Alternatively you
 could pay for solution such as [stape.io](https://stape.io) (est. 20 dollar) which is definitely cheaper than the 'Automatic' 
