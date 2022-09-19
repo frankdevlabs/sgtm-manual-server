@@ -1,3 +1,4 @@
 .env
-proxy/logs/*
+proxy/logs/**
+!proxy/logs/.gitkeep
 .idea
