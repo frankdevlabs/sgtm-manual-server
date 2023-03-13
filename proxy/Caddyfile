@@ -1,6 +1,8 @@
 {$TAG_SERVER_DOMAIN} {
+  tls internal
+
   log {
-    output file       /etc/logs/{$TAG_SERVER_DOMAIN}-access.json {
+    output file /etc/logs/{$TAG_SERVER_DOMAIN}-access.json {
       roll_size 50mib
       roll_keep 10
     }
@@ -16,8 +18,10 @@
 }
 
 {$PREVIEW_SERVER_DOMAIN} {
+  tls internal
+
   log {
-    output file       /etc/logs/{$PREVIEW_SERVER_DOMAIN}-access.json {
+    output file /etc/logs/{$PREVIEW_SERVER_DOMAIN}-access.json {
       roll_size 50mib
       roll_keep 10
     }
@@ -29,5 +33,12 @@
     header_up X-Forwarded-For {http.request.remote}
     header_up X-Forwarded-Port {http.request.port}
     header_up X-Forwarded-Proto {http.request.scheme}
+  }
+}
+
+:8888 {
+  tls internal
+  respond /healthz "ok" 200 {
+  	close
   }
 }
