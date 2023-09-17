@@ -2,3 +2,4 @@
 proxy/logs/**
 !proxy/logs/.gitkeep
 .idea
+functions
