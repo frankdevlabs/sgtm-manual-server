@@ -5,12 +5,16 @@ services:
     deploy:
       replicas: 3
       placement:
-        max_replicas_per_node: 1
+        max_replicas_per_node: 2
       update_config:
         parallelism: 2
         delay: 10s
       restart_policy:
-        condition: on-failure
+        condition: any
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     environment:
       - CONTAINER_CONFIG=$CONTAINER_CONFIG
       - PREVIEW_SERVER_URL=https://${PREVIEW_SERVER_DOMAIN}
@@ -21,23 +25,33 @@ services:
     deploy:
       replicas: 1
       restart_policy:
-        condition: on-failure
+        condition: any
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
     environment:
       - CONTAINER_CONFIG=$CONTAINER_CONFIG
       - RUN_AS_PREVIEW_SERVER=true
 
   proxy:
-    image: caddy:2
+    image: caddy:2.7.4-alpine
     deploy:
       replicas: 1
       placement:
         constraints:
           - "node.role==manager"
       restart_policy:
-        condition: on-failure
+        condition: any
     ports:
-      - "80:80"
-      - "443:443"
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
     volumes:
       - $PWD/proxy/Caddyfile:/etc/caddy/Caddyfile
       - $PWD/proxy/logs:/etc/logs
