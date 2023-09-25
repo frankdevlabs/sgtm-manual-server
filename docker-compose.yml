@@ -35,7 +35,7 @@ services:
       - RUN_AS_PREVIEW_SERVER=true
 
   proxy:
-    image: caddy:2.7.4-alpine
+    image: ghcr.io/frankdevlabs/sgtm-manual-server:latest
     deploy:
       replicas: 1
       placement:
