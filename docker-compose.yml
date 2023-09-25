@@ -35,7 +35,7 @@ services:
       - RUN_AS_PREVIEW_SERVER=true
 
   proxy:
-    image: ghcr.io/frankdevlabs/sgtm-manual-server:latest
+    image: ghcr.io/frankdevlabs/caddy-geo-headers:latest
     deploy:
       replicas: 1
       placement:
