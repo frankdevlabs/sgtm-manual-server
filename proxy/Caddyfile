@@ -1,3 +1,38 @@
+{
+  order geoip2_vars first
+
+  # Only configure databaseDirectory and editionID when autoupdate is not desired.
+  geoip2 {
+    accountId         ${MAXMIND_ACCOUNT_ID}
+    databaseDirectory "/tmp/"
+    licenseKey        ${MAXMIND_LICENSE_KEY}
+    lockFile          "/tmp/geoip2.lock"
+    editionID         "GeoLite2-City"
+    updateUrl         "https://updates.maxmind.com"
+    updateFrequency   86400   # in seconds
+  }
+}
+
+(default_headers) {
+  header_up Host {remote_host}
+  header_up X-Forwarded-For {client_ip}
+  # header_up X-Forwarded-Proto {scheme} Unnecessary header_up X-Forwarded-Proto: the reverse proxy's default behavior is to pass headers to the upstream
+  header_up X-Forwarded-Host {remote_host}
+}
+
+(geoip_headers) {
+  header_up X-GeoIP-City-Name {geoip2.city_name}
+  header_up X-GeoIP-Continent-Code {geoip2.continent_code}
+  header_up X-GeoIP-Continent-Name {geoip2.continent_name}
+  header_up X-GeoIP-Country-Code {geoip2.country_code}
+  header_up X-GeoIP-Country-Name {geoip2.country_name}
+  header_up X-GeoIP-Country-EU {geoip2.country_eu}
+  header_up X-GeoIP-Location-Accuracy-Radius {geoip2.location_accuracy_radius}
+  header_up X-GeoIP-Location-Latitude {geoip2.location_latitude}
+  header_up X-GeoIP-Location-Longitude {geoip2.location_longitude}
+  header_up X-GeoIP-Location-Time-Zone {geoip2.location_time_zone}
+}
+
 {$TAG_SERVER_DOMAIN} {
   log {
     output file       /etc/logs/{$TAG_SERVER_DOMAIN}-access.json {
@@ -6,12 +41,17 @@
     }
   }
 
-	reverse_proxy http://tag-server:8080 {
-        header_up Host {remote_host}
-        header_up X-Forwarded-For {client_ip}
-        # header_up X-Forwarded-Proto {scheme} Unnecessary header_up X-Forwarded-Proto: the reverse proxy's default behavior is to pass headers to the upstream
-        header_up X-Forwarded-Host {remote_host}
-	}
+  geoip2_vars strict
+  @hasGeoip expression {geoip2.country_code} != ""
+
+	reverse_proxy @hasGeoip http://tag-server:8080 {
+    import geoip_headers
+    import default_headers
+  }
+
+  reverse_proxy http://tag-server:8080 {
+    import default_headers
+  }
 }
 
 {$PREVIEW_SERVER_DOMAIN} {
@@ -23,9 +63,7 @@
   }
 
 	reverse_proxy http://preview-server:8080 {
-        header_up Host {remote_host}
-        header_up X-Forwarded-For {client_ip}
-        header_up X-Forwarded-Host {remote_host}
+    import default_headers
 	}
 }
 
