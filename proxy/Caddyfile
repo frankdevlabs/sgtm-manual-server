@@ -3,9 +3,9 @@
 
   # Only configure databaseDirectory and editionID when autoupdate is not desired.
   geoip2 {
-    accountId         ${MAXMIND_ACCOUNT_ID}
+    accountId         {$MAXMIND_ACCOUNT_ID}
     databaseDirectory "/tmp/"
-    licenseKey        ${MAXMIND_LICENSE_KEY}
+    licenseKey        {$MAXMIND_LICENSE_KEY}
     lockFile          "/tmp/geoip2.lock"
     editionID         "GeoLite2-City"
     updateUrl         "https://updates.maxmind.com"
